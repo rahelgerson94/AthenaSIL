@@ -1,0 +1,12 @@
+def configure(conf):
+    pass
+
+def build(bld):
+    lib = bld.stlib(target='AC_Guidance')
+    lib.source = [
+        'EngagementManager.cpp',
+        'Frame.cpp',
+        'Quaternion.cpp',
+        'Vehicle.cpp'
+    ]
+    lib.includes = ['.']
