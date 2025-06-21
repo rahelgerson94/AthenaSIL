@@ -2,13 +2,8 @@
 #include "Frame.h"
 #include "Quaternion.h"
 #include "Constants.h"
-#include <array>
-#include <vector>
-#include <cmath>
 #include <cstring>
-#include <iostream>
 
-using std::vector;
 
 class Vehicle : public Frame 
 {
@@ -20,6 +15,7 @@ class Vehicle : public Frame
     vector<vector<double>> anglesWrtInertialHist;
     vector<vector<double>>  _anglesWrtLosHist;
     vector<vector<double>> qIBhist;
+    double _vB;
     Vehicle(const vector<vector<double>>& x0,
             const vector<double>& anglesWrtInertial,
             double dt,
@@ -59,5 +55,25 @@ class Vehicle : public Frame
     void setAnglesWrtInertial(const vector<double>& ea) ;
     vector<vector<double>> getInertialStates() const ;
     void writeStateHistoryDictCsv(const std::string& filename) const;
+    
+    static void computeCurStates(
+        const vector<vector<double>>& xIprev,
+        double vB,
+        const vector<double>& anglesWrtInertialPrev,
+        const vector<double>& anglesLosInertial,
+        const vector<double>& aCmdInLos,
+        vector<vector<double>>& xI,
+        vector<double>& anglesWrtInertial,
+        vector<double>& anglesWrtLos);
+
+
+    static vector<double> computeAnglesWrtInertial(
+        const vector<double>& aCmdInBodyCur,
+        const vector<double>& anglesWrtInertialPrev,
+        double vB);
+
+    static vector<double> computeAnglesWrtLos(
+        const vector<vector<double>>& xIcur,
+        const vector<double>& anglesLosInertial);
 
 };

@@ -1,6 +1,4 @@
 #pragma once
-#include <vector>
-#include <array>
 #include <string>
 #include "VectorMath.h"
 #include "Constants.h"

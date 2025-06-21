@@ -1,7 +1,5 @@
 #pragma once
-#include <vector>
 #include <stdexcept>
-#include <cmath> //for isnan
 #include "Constants.h"
 
 // Vector addition: a + b

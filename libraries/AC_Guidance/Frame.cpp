@@ -4,14 +4,15 @@
 using std::vector;
 using std::string;
 using std::array;
-//using json = nlohmann::json;
 
+double Frame::_dt = 0.0;
 Frame::Frame(const vector<vector<double>>& x0,
              const vector<double>& anglesWrtInertial,
              double dt,
              const string& name)
-    : _dt(dt), _name(name)
 {
+    _dt = 0;
+    _name = name;
     _anglesWrtInertial = anglesWrtInertial * DEG2RAD;
     _IB =Quaternion::dcmFromEulerAngles321(_anglesWrtInertial);
     vector<double> rInI = x0[R] * FT2M;

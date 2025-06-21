@@ -1,6 +1,5 @@
 #include "Vehicle.h"
-#include <cmath>
-Vehicle::Vehicle(const vector<vector<double>>& x0,
+Vehicle::Vehicle(const vector<vector<double>>& x0, //{rInI, vInB}
                  const vector<double>& anglesWrtInertial,
                  double dt,
                  const std::string& name)
@@ -9,7 +8,9 @@ Vehicle::Vehicle(const vector<vector<double>>& x0,
     _xI = initInertialStates(x0[R]*FT2M, 
                             x0[V]*FT2M);
     _qLB = {0,0,0,0};
-    _anglesWrtLos= {0,0,0};
+    _anglesWrtLos= {0,0,0};  
+    _vB = norm(_xI0[V]);
+    _dt = dt;
     
 }
 
@@ -37,13 +38,12 @@ void Vehicle::update(const vector<double>& accelInFrame,
 
     double gamma = _anglesWrtInertial[Y];
     double phi = _anglesWrtInertial[Z];
-    double vB = _xB[V][X];
     vector<double> vInIprev = _xI[V];
     _xI[V] = 
     {
-        vB * cos(phi) * cos(gamma),
-        vB * sin(phi) * cos(gamma),
-        vB * sin(gamma)
+        _vB * cos(phi) * cos(gamma),
+        _vB * sin(phi) * cos(gamma),
+        _vB * sin(gamma)
     };
 
     _xI[R] = _xI[R] + _xI[V] * _dt;
@@ -154,4 +154,70 @@ void Vehicle::writeStateHistoryDictCsv(const std::string& filename) const
     }
 
     file.close();
+}
+
+void Vehicle::computeCurStates(
+    const vector<vector<double>>& xIprev,
+    double vB,
+    const vector<double>& anglesWrtInertialPrev,
+    const vector<double>& anglesLosInertial,
+    const vector<double>& aCmdInLos,
+    vector<vector<double>>& xI, //output
+    vector<double>& anglesWrtInertial, //output
+    vector<double>& anglesWrtLos)  //output
+{
+
+    double gamma = anglesWrtInertialPrev[Y];
+    double phi = anglesWrtInertialPrev[Z];
+
+    xI[V][X] = vB * std::cos(phi) * std::cos(gamma);
+    xI[V][Y] = vB * std::sin(phi) * std::cos(gamma);
+    xI[V][Z] = vB * std::sin(gamma);
+
+    
+    xI[R] = xIprev[R]+ xI[V] * _dt;
+
+    anglesWrtLos = computeAnglesWrtLos(xI, anglesLosInertial);
+    vector<double> qLB = Quaternion::quaternionFromEulerAngles321(anglesWrtLos);
+    vector<double> aCmdInB = Quaternion::rotateVectorByQuaternion(qLB, aCmdInLos);
+
+    vector<double> angleRates = computeAnglesWrtInertial(aCmdInB, anglesWrtInertialPrev, vB);
+    anglesWrtInertial = anglesWrtInertialPrev + angleRates * _dt; 
+}
+
+vector<double> Vehicle::computeAnglesWrtInertial(
+    const vector<double>& aCmdInBodyCur,
+    const vector<double>& anglesWrtInertialPrev,
+    double vB)
+{
+    
+    vector<double> angleRatesWrtInertial(3, 0.0);
+
+    if (aCmdInBodyCur[Z] == 0 && vB == 0) {
+        angleRatesWrtInertial[Y] = 0;
+    } else {
+        angleRatesWrtInertial[Y] = aCmdInBodyCur[Z] / vB;
+    }
+
+    if (aCmdInBodyCur[Y] == 0 && vB == 0) {
+        angleRatesWrtInertial[Z] = 0;
+    } else {
+        double theta = anglesWrtInertialPrev[Y];
+        angleRatesWrtInertial[Z] = aCmdInBodyCur[Y] / (vB * std::cos(theta));
+    }
+
+    return angleRatesWrtInertial;
+}
+
+vector<double> Vehicle::computeAnglesWrtLos(
+    const vector<vector<double>>& xIcur,
+    const vector<double>& anglesLosInertial)
+{
+    vector<double> qIL = Quaternion::quaternionFromEulerAngles321(anglesLosInertial);
+    vector<double> vLos = Quaternion::rotateVectorByQuaternion(qIL, xIcur[V]);
+
+    vector<double> angles(3, 0.0);
+    angles[Y] = std::atan2(vLos[Z], std::sqrt(vLos[X]*vLos[X] + vLos[Y]*vLos[Y]));
+    angles[Z] = std::atan2(vLos[Y], vLos[X]);
+    return angles;
 }

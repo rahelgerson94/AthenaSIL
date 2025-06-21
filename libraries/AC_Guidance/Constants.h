@@ -1,9 +1,15 @@
 #pragma once
 
-#pragma once
 #include <array>
 #include <cmath>
 #include <limits>
+#include <iostream>
+#include <vector>
+
+using std::vector; 
+using std::string;
+using std::cout;
+using std::endl;
 
 #define X 0
 #define Y 1
@@ -42,3 +48,4 @@ constexpr std::array<double, 3> UNUSED = {
 constexpr std::array<double, 4> QZERO = {1.0, 0.0, 0.0, 0.0};
 
 constexpr double dt = 0.05;
+           
