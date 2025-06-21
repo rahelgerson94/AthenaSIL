@@ -120,7 +120,7 @@ void Frame::writeStateHistoryDictCsv(const std::string& filename) const
     file << "Rx,Ry,Rz,"
          << "Vx,Vy,Vz,"
          << "Ax,Ay,Az,"
-         << "yaw,pitch,roll,"
+         << "roll,pitch,yaw,"
          << "qIBw,qIBx,qIBy,qIBz\n";
 
     size_t n = _stateHistInI.size();
@@ -135,7 +135,7 @@ void Frame::writeStateHistoryDictCsv(const std::string& filename) const
              << r[0] << "," << r[1] << "," << r[2] << ","
              << v[0] << "," << v[1] << "," << v[2] << ","
              << a[0] << "," << a[1] << "," << a[2] << ","
-             << angles[2] << "," << angles[1] << "," << angles[0] << ","   // 321: yaw, pitch, roll
+             << angles[0] << "," << angles[1] << "," << angles[2] << ","   
              << q[0] << "," << q[1] << "," << q[2] << "," << q[3] << "\n";
     }
 

@@ -189,7 +189,7 @@ void EngagementManager::writeStateHistoryDictCsv(const std::string& filename) co
     std::filesystem::create_directories("output");
 
     //  CSV header
-    file << "yaw,pitch,roll,"
+    file << "roll,pitch,yaw,"
          << "qIBw,qIBx,qIBy,qIBz,"
          << "RxWp,RyWp,RzWp,"
          << "VxWp,VyWp,VzWp,"
@@ -205,7 +205,7 @@ void EngagementManager::writeStateHistoryDictCsv(const std::string& filename) co
 
         // Write yaw, pitch, roll
         file << std::fixed << std::setprecision(8)
-             << angles[2] << "," << angles[1] << "," << angles[0] << ",";
+             << angles[0] << "," << angles[1] << "," << angles[2] << ",";
 
         // Write quaternion
         file << q[0] << "," << q[1] << "," << q[2] << "," << q[3] << ",";
