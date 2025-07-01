@@ -1,6 +1,6 @@
 #!/bin/bash
 
-refDir="/Users/rahelmizrahi/Documents/PlatformIO/Projects/AthenaSim/AthenaSimCpp"
+refDir=$1
 
 rsync -av "$refDir/Guidance/"*.cpp .
 rsync -av "$refDir/Guidance/"*.h .
