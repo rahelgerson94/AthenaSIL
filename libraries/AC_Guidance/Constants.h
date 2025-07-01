@@ -5,6 +5,7 @@
 #include <limits>
 #include <iostream>
 #include <vector>
+#include <cstdlib> //for getenv
 
 using std::vector; 
 using std::string;
@@ -19,9 +20,9 @@ using std::endl;
 #define PITCH 1
 #define YAW   2
 
-#define R 0
-#define V 1
-#define A 2
+#define POS 0
+#define VEL 1
+#define ACCEL 2
 
 #define FT2M     0.3048
 #define M2FT     3.28084
@@ -45,7 +46,3 @@ constexpr std::array<double, 3> UNUSED = {
     std::numeric_limits<double>::quiet_NaN(),
     std::numeric_limits<double>::quiet_NaN()
 };
-constexpr std::array<double, 4> QZERO = {1.0, 0.0, 0.0, 0.0};
-
-constexpr double dt = 0.05;
-           

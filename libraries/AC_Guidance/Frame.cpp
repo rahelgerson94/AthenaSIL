@@ -6,6 +6,8 @@ using std::string;
 using std::array;
 
 double Frame::_dt = 0.0;
+Frame::Frame(){}
+
 Frame::Frame(const vector<vector<double>>& x0,
              const vector<double>& anglesWrtInertial,
              double dt,
@@ -15,8 +17,8 @@ Frame::Frame(const vector<vector<double>>& x0,
     _name = name;
     _anglesWrtInertial = anglesWrtInertial * DEG2RAD;
     _IB =Quaternion::dcmFromEulerAngles321(_anglesWrtInertial);
-    vector<double> rInI = x0[R] * FT2M;
-    vector<double> vInB = x0[V] * FT2M;
+    vector<double> rInI = x0[POS] * FT2M;
+    vector<double> vInB = x0[VEL] * FT2M;
     
     _qIB =Quaternion::quaternionFromEulerAngles321(_anglesWrtInertial);
     _qBI =Quaternion::conjugate(_qIB);
@@ -26,10 +28,10 @@ Frame::Frame(const vector<vector<double>>& x0,
 }
 
 void Frame::updateStates(const vector<double>& accelInBody) {
-    _xB[A] = accelInBody;
-    _xB[V] = accelInBody * _dt;
-    vector<double> xI0VRot =Quaternion::rotateVectorByQuaternion(_qIB, _xI0[V]);
-    _xB[R] = _xB[R] + xI0VRot * _dt + accelInBody * (0.5f * _dt * _dt);
+    _xB[ACCEL] = accelInBody;
+    _xB[VEL] = accelInBody * _dt;
+    vector<double> xI0VRot =Quaternion::rotateVectorByQuaternion(_qIB, _xI0[VEL]);
+    _xB[POS] = _xB[POS] + xI0VRot * _dt + accelInBody * (0.5f * _dt * _dt);
 }
 
 
@@ -45,13 +47,13 @@ void Frame::storeStatesInEnglishUnits(const vector<double>& r,
 const vector<double>& Frame::getAnglesWrtInertial() const { return _anglesWrtInertial; }
 
 vector<vector<double>> Frame::getInertialStates() const {
-    vector<double> aInI =Quaternion::rotateVectorByQuaternion(_qBI, _xB[A]);
-    return { _xI[R], _xI[V], aInI };
+    vector<double> aInI =Quaternion::rotateVectorByQuaternion(_qBI, _xB[ACCEL]);
+    return { _xI[POS], _xI[VEL], aInI };
 }
 
 vector<vector<double>> Frame::getBodyStates() const {
-    vector<double> rB = _xB[R] + _xB[V] * _dt;
-    return { rB, _xB[V], _xB[A] };
+    vector<double> rB = _xB[POS] + _xB[VEL] * _dt;
+    return { rB, _xB[VEL], _xB[ACCEL] };
 }
 
 // json Frame::parseConfig(const string& cfgFile) {
@@ -77,14 +79,14 @@ void Frame::printStates() const {
     std::cout << "---------" << (_name.empty() ? "vehicleObj" : _name) << "---------\n";
 
     const auto& statesI = getInertialStates();
-    const auto& r = statesI[R];
-    // const auto& v = statesI[V];
-    // const auto& a = statesI[A];
+    const auto& r = statesI[POS];
+    // const auto& v = statesI[VEL];
+    // const auto& a = statesI[ACCEL];
 
     const auto& statesB = getBodyStates();
-    const auto& rB = statesB[R];
-    const auto& vB = statesB[V];
-    const auto& aB = statesB[A];
+    const auto& rB = statesB[POS];
+    const auto& vB = statesB[VEL];
+    const auto& aB = statesB[ACCEL];
 
     std::cout << "\nrInI:\t";
     for (double val : r * M2FT) std::cout << val << "\t";
@@ -109,11 +111,13 @@ const vector<vector<double>>& Frame::getIB() const { return _IB; }
 
 
 
-void Frame::writeStateHistoryDictCsv(const std::string& filename) const 
+void Frame::writeStateHistoryDictCsv(void) const 
 {
-    std::ofstream file("output/" + filename + ".csv");
+    string PROJ_ROOT_PATH = std::getenv("PROJ_ROOT_PATH") ? std::getenv("PROJ_ROOT_PATH") : "";
+    string filename = PROJ_ROOT_PATH + "/AthenaSimCpp/output/" + _name + ".csv";
+    std::ofstream file(filename);
     if (!file.is_open()) {
-        throw std::runtime_error("Unable to open file: " + filename);
+        throw std::runtime_error("Unable to open file: " + _name);
     }
 
     // Header
@@ -125,9 +129,9 @@ void Frame::writeStateHistoryDictCsv(const std::string& filename) const
 
     size_t n = _stateHistInI.size();
     for (size_t i = 0; i < n; ++i) {
-        const auto& r = _stateHistInI[i][R];
-        const auto& v = _stateHistInI[i][V];
-        const auto& a = _stateHistInI[i][A];
+        const auto& r = _stateHistInI[i][POS];
+        const auto& v = _stateHistInI[i][VEL];
+        const auto& a = _stateHistInI[i][ACCEL];
         const auto& angles = _anglesWrtInertialHist[i];   // [yaw, pitch, roll] in deg
         const auto& q = _qIBhist[i];                      // quaternion [w, x, y, z]
 

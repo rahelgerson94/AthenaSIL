@@ -23,7 +23,7 @@ public:
     vector<vector<double>> _anglesWrtInertialHist;
     vector<vector<double>> _qIBhist;
     vector<vector<double>> _xI0;
-
+    Frame();
     Frame(const vector<vector<double>>& x0,
           const vector<double>& anglesWrtInertial,
           double dt,
@@ -32,9 +32,9 @@ public:
     virtual void update(const vector<double>& accelInBody,
                         const vector<double>& anglesLosWrtI,
                         const vector<double>& angleRatesWrtLos) 
-                {
-                    
-                }
+    {
+        
+    }
 
     void updateStates(const vector<double>& accelInBody);
 
@@ -57,7 +57,7 @@ public:
     const vector<double>& getqIB() const;
     const vector<double>& getqBI() const ;
     const vector<vector<double>>& getIB() const ;
-    void writeStateHistoryDictCsv(const std::string& filename) const;
+    void writeStateHistoryDictCsv(void) const;
     
 };
 

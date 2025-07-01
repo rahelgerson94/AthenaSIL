@@ -16,6 +16,8 @@ class Vehicle : public Frame
     vector<vector<double>>  _anglesWrtLosHist;
     vector<vector<double>> qIBhist;
     double _vB;
+    Vehicle();
+
     Vehicle(const vector<vector<double>>& x0,
             const vector<double>& anglesWrtInertial,
             double dt,
@@ -36,14 +38,13 @@ class Vehicle : public Frame
                                                   const vector<double>& aInB);
     void update(const vector<double>& accelInFrame,
                 const vector<double>& anglesLosInertial,
-                const std::string& accelFrame = "b",
-                const vector<double>* yprCmd = nullptr);
+                const std::string& accelFrame = "b");
 
     vector<double> computeAngleRatesWrtInertial(const vector<double>& a);
 
     vector<double> computeAnglesWrtLos(const vector<double>& anglesLosInertial);
 
-    const vector<double>& getAnglesWrtLos() const;
+    const vector<double>& getAnglesWrtLos() ;
 
     void storeStatesInEnglishUnits() ;
 
@@ -53,8 +54,8 @@ class Vehicle : public Frame
     void setAccel(const vector<double>& a, const std::string& frame) ;
 
     void setAnglesWrtInertial(const vector<double>& ea) ;
-    vector<vector<double>> getInertialStates() const ;
-    void writeStateHistoryDictCsv(const std::string& filename) const;
+    vector<vector<double>> getInertialStates() ;
+    void writeStateHistoryDictCsv( ) const;
     
     static void computeCurStates(
         const vector<vector<double>>& xIprev,
@@ -70,7 +71,7 @@ class Vehicle : public Frame
     static vector<double> computeAnglesWrtInertial(
         const vector<double>& aCmdInBodyCur,
         const vector<double>& anglesWrtInertialPrev,
-        double vB);
+        const double vB);
 
     static vector<double> computeAnglesWrtLos(
         const vector<vector<double>>& xIcur,
