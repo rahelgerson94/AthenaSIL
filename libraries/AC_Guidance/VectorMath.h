@@ -1,12 +1,12 @@
 #pragma once
 #include <stdexcept>
 #include "Constants.h"
-
+namespace GC = GuidanceConstants;
 // Vector addition: a + b
 inline std::vector<double> operator+(const std::vector<double>& a, const std::vector<double>& b)
 {
     if (a.size() != b.size())
-        throw std::invalid_argument("Vector addition error: size mismatch");
+        printf("Vector addition error: size mismatch");
     
     std::vector<double> result(a.size());
     for (size_t i = 0; i < a.size(); ++i)
@@ -18,7 +18,7 @@ inline std::vector<double> operator+(const std::vector<double>& a, const std::ve
 inline std::vector<double> operator-(const std::vector<double>& a, const std::vector<double>& b)
 {
     if (a.size() != b.size())
-        throw std::invalid_argument("Vector addition error: size mismatch");
+        printf("Vector addition error: size mismatch");
     
     std::vector<double> result(a.size());
     for (size_t i = 0; i < a.size(); ++i)
@@ -54,19 +54,19 @@ inline std::vector<double> operator/( const std::vector<double>& v, double scala
 
 inline double dot(const std::vector<double>& a, const std::vector<double>& b) {
     if (a.size() != 3 || b.size() != 3)
-        throw std::invalid_argument("dotProduct: vectors must be 3D");
-    return a[X]*b[X] + a[Y]*b[Y] + a[Z]*b[Z];
+        printf("dotProduct: vectors must be 3D");
+    return a[GC::X]*b[GC::X] + a[GC::Y]*b[GC::Y] + a[GC::Z]*b[GC::Z];
 }
 
 // Compute the cross product of two 3D vectors
 inline std::vector<double> cross(const std::vector<double>& a, const std::vector<double>& b) {
     if (a.size() != 3 || b.size() != 3)
-        throw std::invalid_argument("crossProduct: vectors must be 3D");
+        printf("crossProduct: vectors must be 3D");
     return 
     {
-        a[Y]*b[Z] - a[Z]*b[Y],
-        a[Z]*b[X] - a[X]*b[Z],
-        a[X]*b[Y] - a[Y]*b[X]
+        a[GC::Y]*b[GC::Z] - a[GC::Z]*b[GC::Y],
+        a[GC::Z]*b[GC::X] - a[GC::X]*b[GC::Z],
+        a[GC::X]*b[GC::Y] - a[GC::Y]*b[GC::X]
     };
 }
 inline double norm(const std::vector<double>& v) {

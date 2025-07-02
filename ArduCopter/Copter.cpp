@@ -154,6 +154,7 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
     SCHED_TASK(fence_check,           25,    100,  7),
 #endif
     SCHED_TASK_CLASS(AP_GPS,               &copter.gps,                 update,          50, 200,   9),
+    SCHED_TASK_CLASS(AC_Guidance,          &copter.guide,               update,          50, 200,   9),
 #if AP_OPTICALFLOW_ENABLED
     SCHED_TASK_CLASS(AP_OpticalFlow,          &copter.optflow,             update,         200, 160,  12),
 #endif
@@ -962,6 +963,21 @@ bool Copter::get_rate_ef_targets(Vector3f& rate_ef_targets) const
     return true;
 }
 
+/* void Copter::setup()
+{
+
+    // Set initial simulated location
+    Location loc = Location::from_degrees(33.4255e7, -111.9400e7, 10000);  // e.g., Chandler AZ, 100m AGL
+    sitl.set_position(loc);
+
+    // Set velocity
+    sitl.velocity = Vector3f(2.0f, 0.0f, 0.0f);  // 2 m/s north
+
+    // Set initial orientation (yaw = 90 degrees)
+    sitl.attitude.from_euler(Vector3f(0.0f, 0.0f, radians(90.0f)));
+#endif
+} */
+
 /*
   constructor for main Copter class
  */
@@ -983,3 +999,4 @@ Copter copter;
 AP_Vehicle& vehicle = copter;
 
 AP_HAL_MAIN_CALLBACKS(&copter);
+

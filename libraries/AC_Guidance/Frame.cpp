@@ -1,10 +1,7 @@
 #include "Frame.h"
 
-
-using std::vector;
-using std::string;
-using std::array;
-
+namespace GC = GuidanceConstants;
+namespace GU = GuidanceUtils;
 double Frame::_dt = 0.0;
 Frame::Frame(){}
 
@@ -16,21 +13,21 @@ Frame::Frame(const vector<vector<double>>& x0,
     _dt = 0;
     _name = name;
     _anglesWrtInertial = anglesWrtInertial * DEG2RAD;
-    _IB =Quaternion::dcmFromEulerAngles321(_anglesWrtInertial);
+    _IB =GU::Quaternion::dcmFromEulerAngles321(_anglesWrtInertial);
     vector<double> rInI = x0[POS] * FT2M;
     vector<double> vInB = x0[VEL] * FT2M;
     
-    _qIB =Quaternion::quaternionFromEulerAngles321(_anglesWrtInertial);
-    _qBI =Quaternion::conjugate(_qIB);
-    _xB = {Quaternion::rotateVectorByQuaternion(_qIB, rInI), vInB, {0.0, 0.0, 0.0} };
-    _xI = { rInI,Quaternion::rotateVectorByQuaternion(_qBI, vInB), {0.0, 0.0, 0.0} };
+    _qIB =GU::Quaternion::quaternionFromEulerAngles321(_anglesWrtInertial);
+    _qBI =GU::Quaternion::conjugate(_qIB);
+    _xB = {GU::Quaternion::rotateVectorByQuaternion(_qIB, rInI), vInB, {0.0, 0.0, 0.0} };
+    _xI = { rInI,GU::Quaternion::rotateVectorByQuaternion(_qBI, vInB), {0.0, 0.0, 0.0} };
     _xI0 = _xI;
 }
 
 void Frame::updateStates(const vector<double>& accelInBody) {
     _xB[ACCEL] = accelInBody;
     _xB[VEL] = accelInBody * _dt;
-    vector<double> xI0VRot =Quaternion::rotateVectorByQuaternion(_qIB, _xI0[VEL]);
+    vector<double> xI0VRot =GU::Quaternion::rotateVectorByQuaternion(_qIB, _xI0[VEL]);
     _xB[POS] = _xB[POS] + xI0VRot * _dt + accelInBody * (0.5f * _dt * _dt);
 }
 
@@ -47,7 +44,7 @@ void Frame::storeStatesInEnglishUnits(const vector<double>& r,
 const vector<double>& Frame::getAnglesWrtInertial() const { return _anglesWrtInertial; }
 
 vector<vector<double>> Frame::getInertialStates() const {
-    vector<double> aInI =Quaternion::rotateVectorByQuaternion(_qBI, _xB[ACCEL]);
+    vector<double> aInI =GU::Quaternion::rotateVectorByQuaternion(_qBI, _xB[ACCEL]);
     return { _xI[POS], _xI[VEL], aInI };
 }
 
@@ -70,9 +67,9 @@ vector<vector<double>> Frame::getBodyStates() const {
 vector<vector<double>> Frame::getStates() const { return _xI; }
 
 void Frame::printAngles() const {
-    std::cout << "\u03A8: " << RAD2DEG * _anglesWrtInertial[Z] << " deg\n";
-    std::cout << "\u03B8: " << RAD2DEG * _anglesWrtInertial[Y] << " deg\n";
-    std::cout << "\u03D5: " << RAD2DEG * _anglesWrtInertial[X] << " deg\n\n";
+    std::cout << "\u03A8: " << RAD2DEG * _anglesWrtInertial[GC::Z] << " deg\n";
+    std::cout << "\u03B8: " << RAD2DEG * _anglesWrtInertial[GC::Y] << " deg\n";
+    std::cout << "\u03D5: " << RAD2DEG * _anglesWrtInertial[GC::X] << " deg\n\n";
 }
 
 void Frame::printStates() const {

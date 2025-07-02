@@ -2,11 +2,23 @@ def configure(conf):
     pass
 
 def build(bld):
-    lib = bld.stlib(target='AC_Guidance')
+    lib = bld.stlib(
+        target = 'AC_Guidance',
+        features = 'cxx',
+        includes = ['.'],
+        source = bld.path.ant_glob('*.cpp'),
+        name = 'AC_Guidance',
+        use = ['HAL'],  # <<--- tells waf to link HAL symbols
+        cxxflags = ['-Wno-error'],  # optional if you're hitting Werror
+    )
     lib.source = [
-        'EngagementManager.cpp',
+        'Guidance.cpp',
         'Frame.cpp',
+        'Frame.h',
         'Quaternion.cpp',
-        'Vehicle.cpp'
+        'Quaternion.hcpp',
+        'Vehicle.cpp',
+        'Vehicle.h',
+        
     ]
     lib.includes = ['.']

@@ -7,7 +7,8 @@ using std::vector;
 using Vec3 = vector<double>;
 using Vec4 = vector<double>;
 using Mat3 =vector<vector<double>>;
-
+namespace GuidanceUtils
+{
 class Quaternion 
 {
 public:
@@ -50,5 +51,4 @@ public:
     // Converts a quaternion to a DCM
     static Mat3 quat2Dcm(const Vec4& q);
 };
-
-
+};//end namespace

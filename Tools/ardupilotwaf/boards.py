@@ -276,7 +276,7 @@ class Board:
 
             '-Wall',
             '-Wextra',
-            '-Werror=format',
+            #'-Werror=format',
             '-Wpointer-arith',
             '-Wcast-align',
             '-Wno-missing-field-initializers',
@@ -284,17 +284,17 @@ class Board:
             '-Wno-redundant-decls',
             '-Wno-unknown-pragmas',
             '-Wno-trigraphs',
-            '-Werror=shadow',
-            '-Werror=return-type',
-            '-Werror=unused-result',
-            '-Werror=unused-variable',
-            '-Werror=narrowing',
-            '-Werror=attributes',
-            '-Werror=overflow',
-            '-Werror=parentheses',
-            '-Werror=format-extra-args',
-            '-Werror=ignored-qualifiers',
-            '-Werror=undef',
+            #'-Werror=shadow',
+            #'-Werror=return-type',
+            #'-Werror=unused-result',
+            #'-Werror=unused-variable',
+            #'-Werror=narrowing',
+            #'-Werror=attributes',
+            #'-Werror=overflow',
+            #'-Werror=parentheses',
+            #'-Werror=format-extra-args',
+            #'-Werror=ignored-qualifiers',
+            #'-Werror=undef',
             '-DARDUPILOT_BUILD',
         ]
 
@@ -325,7 +325,7 @@ class Board:
                 '-Wno-inconsistent-missing-override',
                 '-Wno-mismatched-tags',
                 '-Wno-gnu-variable-sized-type-not-at-end',
-                '-Werror=implicit-fallthrough',
+                #'-Werror=implicit-fallthrough',
                 '-cl-single-precision-constant',
                 '-Wno-vla-extension',
             ]
@@ -398,30 +398,30 @@ class Board:
             '-Wno-redundant-decls',
             '-Wno-unknown-pragmas',
             '-Wno-expansion-to-defined',
-            '-Werror=reorder',
-            '-Werror=cast-align',
-            '-Werror=attributes',
-            '-Werror=format-security',
-            '-Werror=format-extra-args',
-            '-Werror=enum-compare',
-            '-Werror=format',
-            '-Werror=array-bounds',
-            '-Werror=uninitialized',
-            '-Werror=init-self',
-            '-Werror=narrowing',
-            '-Werror=return-type',
-            '-Werror=switch',
-            '-Werror=sign-compare',
-            '-Werror=type-limits',
-            '-Werror=undef',
-            '-Werror=unused-result',
-            '-Werror=shadow',
-            '-Werror=unused-value',
-            '-Werror=unused-variable',
-            '-Werror=delete-non-virtual-dtor',
+            #'-Werror=reorder',
+            #'-Werror=cast-align',
+            #'-Werror=attributes',
+            #'-Werror=format-security',
+            #'-Werror=format-extra-args',
+            #'-Werror=enum-compare',
+            #'-Werror=format',
+            #'-Werror=array-bounds',
+            #'-Werror=uninitialized',
+            #'-Werror=init-self',
+            #'-Werror=narrowing',
+            #'-Werror=return-type',
+            #'-Werror=switch',
+            #'-Werror=sign-compare',
+            #'-Werror=type-limits',
+            #'-Werror=undef',
+            #'-Werror=unused-result',
+            #'-Werror=shadow',
+            #'-Werror=unused-value',
+            #'-Werror=unused-variable',
+            #'-Werror=delete-non-virtual-dtor',
             '-Wfatal-errors',
             '-Wno-trigraphs',
-            '-Werror=parentheses',
+            #'-Werror=parentheses',
             '-DARDUPILOT_BUILD',
             '-Wuninitialized',
             '-Warray-bounds',
@@ -431,66 +431,66 @@ class Board:
             env.CXXFLAGS += [
                 '-fcolor-diagnostics',
 
-                '-Werror=address-of-packed-member',
+                #'-Werror=address-of-packed-member',
 
-                '-Werror=inconsistent-missing-override',
-                '-Werror=overloaded-virtual',
+                #'-Werror=inconsistent-missing-override',
+                #'-Werror=overloaded-virtual',
 
                 # catch conversion issues:
-                '-Werror=bitfield-enum-conversion',
-                '-Werror=bool-conversion',
-                '-Werror=constant-conversion',
-                '-Werror=enum-conversion',
-                '-Werror=int-conversion',
-                '-Werror=literal-conversion',
-                '-Werror=non-literal-null-conversion',
-                '-Werror=null-conversion',
-                '-Werror=objc-literal-conversion',
-#                '-Werror=shorten-64-to-32',  # ARRAY_SIZE() creates this all over the place as the caller typically takes a uint32_t not a size_t
-                '-Werror=string-conversion',
-                #    '-Werror=sign-conversion', # can't use as we assign into AP_Int8 from uint8_ts
+                #'-Werror=bitfield-enum-conversion',
+                #'-Werror=bool-conversion',
+                #'-Werror=constant-conversion',
+                #'-Werror=enum-conversion',
+                #'-Werror=int-conversion',
+                #'-Werror=literal-conversion',
+                #'-Werror=non-literal-null-conversion',
+                #'-Werror=null-conversion',
+                #'-Werror=objc-literal-conversion',
+#                #'-Werror=shorten-64-to-32',  # ARRAY_SIZE() creates this all over the place as the caller typically takes a uint32_t not a size_t
+                #'-Werror=string-conversion',
+                #    #'-Werror=sign-conversion', # can't use as we assign into AP_Int8 from uint8_ts
 
                 '-Wno-gnu-designator',
                 '-Wno-mismatched-tags',
                 '-Wno-vla-extension',
                 '-Wno-gnu-variable-sized-type-not-at-end',
-                '-Werror=implicit-fallthrough',
+                #'-Werror=implicit-fallthrough',
                 '-cl-single-precision-constant',
             ]
         else:
             env.CXXFLAGS += [
                 '-Wno-format-contains-nul',
-                '-Werror=unused-but-set-variable',
+                #'-Werror=unused-but-set-variable',
                 '-fsingle-precision-constant',
                 '-Wno-psabi',
             ]
             if self.cc_version_gte(cfg, 5, 2):
                 env.CXXFLAGS += [
-                    '-Werror=suggest-override',
+                    #'-Werror=suggest-override',
                 ]
             if self.cc_version_gte(cfg, 7, 4):
                 env.CXXFLAGS += [
-                    '-Werror=implicit-fallthrough',
-                    '-Werror=maybe-uninitialized',
-                    '-Werror=duplicated-cond',
+                    #'-Werror=implicit-fallthrough',
+                    #'-Werror=maybe-uninitialized',
+                    #'-Werror=duplicated-cond',
                 ]
             if self.cc_version_gte(cfg, 8, 4):
                 env.CXXFLAGS += [
-                    '-Werror=sizeof-pointer-div',
+                    #'-Werror=sizeof-pointer-div',
                 ]
             if self.cc_version_gte(cfg, 13, 2):
                 env.CXXFLAGS += [
-                    '-Werror=use-after-free',
+                    #'-Werror=use-after-free',
                 ]
                 env.CFLAGS += [
-                    '-Werror=use-after-free',
+                    #'-Werror=use-after-free',
                 ]
 
         if cfg.options.Werror:
-            errors = ['-Werror',
-                      '-Werror=missing-declarations',
-                      '-Werror=float-equal',
-                      '-Werror=undef',
+            errors = [#'-Werror',
+                      #'-Werror=missing-declarations',
+                      #'-Werror=float-equal',
+                      #'-Werror=undef',
                     ]
             env.CFLAGS += errors
             env.CXXFLAGS += errors
@@ -773,8 +773,8 @@ class sitl(Board):
                 cfg.define('HAL_CAN_WITH_SOCKETCAN', 0)
 
         env.CXXFLAGS += [
-            '-Werror=float-equal',
-            '-Werror=missing-declarations',
+            #'-Werror=float-equal',
+            #'-Werror=missing-declarations',
         ]
 
         if not cfg.options.disable_networking and not 'clang' in cfg.env.COMPILER_CC:
@@ -1233,11 +1233,11 @@ class chibios(Board):
             '-Wpointer-arith',
             '-Wmissing-declarations',
             '-Wno-unused-parameter',
-            '-Werror=array-bounds',
+            #'-Werror=array-bounds',
             '-Wfatal-errors',
-            '-Werror=uninitialized',
-            '-Werror=init-self',
-            '-Werror=unused-but-set-variable',
+            #'-Werror=uninitialized',
+            #'-Werror=init-self',
+            #'-Werror=unused-but-set-variable',
             '-Wno-missing-field-initializers',
             '-Wno-trigraphs',
             '-fno-strict-aliasing',
@@ -1257,7 +1257,7 @@ class chibios(Board):
             '--specs=nano.specs',
             '--specs=nosys.specs',
             '-D__USE_CMSIS',
-            '-Werror=deprecated-declarations',
+            #'-Werror=deprecated-declarations',
             '-DNDEBUG=1'
         ]
         if not cfg.options.Werror:

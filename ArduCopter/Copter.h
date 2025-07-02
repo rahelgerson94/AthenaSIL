@@ -20,6 +20,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Header includes
 ////////////////////////////////////////////////////////////////////////////////
+#include <AC_Guidance/Vehicle.h>
 
 #include <cmath>
 #include <stdio.h>
@@ -138,7 +139,7 @@
 
 #if AP_COPTER_ADVANCED_FAILSAFE_ENABLED
  # include "afs_copter.h"
-#endif
+#endif<span style='color:rgb(255,165,0);'></span>
 #if TOY_MODE_ENABLED
  # include "toy_mode.h"
 #endif
@@ -234,7 +235,7 @@ public:
     Copter(void);
 
 private:
-
+    Guidance guide;
     // key aircraft parameters passed to multiple libraries
     AP_MultiCopter aparm;
 

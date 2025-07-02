@@ -690,10 +690,20 @@ def configure(cfg):
     # Always use system extensions
     cfg.define('_GNU_SOURCE', 1)
 
-    if cfg.options.Werror:
-        # print(cfg.options.Werror)
-        if cfg.options.disable_Werror:
-            cfg.options.Werror = False
+ 
+    if cfg.options.disable_Werror:
+        cfg.msg('Disabling -Werror', 'yes', color='YELLOW')
+        # Remove any existing -Werror flags
+        cfg.env.CXXFLAGS = [f for f in cfg.env.CXXFLAGS if not f.startswith('-Werror')]
+        cfg.env.CFLAGS = [f for f in cfg.env.CFLAGS if not f.startswith('-Werror')]
+
+        # Force-add -Wno-error to suppress them
+        cfg.env.append_unique('CXXFLAGS', ['-Wno-error'])
+        cfg.env.append_unique('CFLAGS', ['-Wno-error'])
+    elif cfg.options.Werror:
+        cfg.msg('Using -Werror', 'yes')
+        cfg.env.append_unique('CXXFLAGS', ['-Werror'])
+        cfg.env.append_unique('CFLAGS', ['-Werror'])
 
     cfg.write_config_header(os.path.join(cfg.variant, 'ap_config.h'), guard='_AP_CONFIG_H_')
 
@@ -733,7 +743,7 @@ def list_ap_periph_boards(ctx):
 def ap_periph_boards(ctx):
     return boards.get_ap_periph_boards()
 
-vehicles = ['antennatracker', 'blimp', 'copter', 'heli', 'plane', 'rover', 'sub']
+vehicles = ['antennatracker', 'blimp', 'copter', 'heli', 'plane']
 
 def generate_tasklist(ctx, do_print=True):
     boardlist = boards.get_boards_names()

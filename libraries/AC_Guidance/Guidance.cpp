@@ -1,6 +1,8 @@
 // Header + Implementation: Guidance.cpp
 #include "Guidance.h"
 #include "Vehicle.h"
+namespace GC = GuidanceConstants;
+namespace GU = GuidanceUtils;
 
 Guidance::Guidance(const vector<vector<double>>& xTi,
                                      const vector<vector<double>>& xPi,
@@ -21,9 +23,9 @@ Guidance::Guidance(const vector<vector<double>>& xTi,
     _xI[POS] = (xTi[POS] - xPi[POS]) * FT2M;
     _xI[VEL] = (xTi[VEL] - xPi[VEL]) * FT2M;
     _anglesWrtInertial = initAngles();
-    _IB = Quaternion::dcmFromEulerAngles32(_anglesWrtInertial);
-    _qIB = Quaternion::quaternionFromEulerAngles321(_anglesWrtInertial);
-    _qBI = Quaternion::conjugate(_qIB);
+    _IB = GU::Quaternion::dcmFromEulerAngles32(_anglesWrtInertial);
+    _qIB = GU::Quaternion::quaternionFromEulerAngles321(_anglesWrtInertial);
+    _qBI = GU::Quaternion::conjugate(_qIB);
     _waypoint = Waypoint(_xI,
                           {0,0,0});
     _dt = dt;
@@ -66,9 +68,9 @@ Guidance::Guidance(const vector<vector<double>>& xTi,
     _xI[POS] = _target._xI[POS] - _pursuer._xI[POS];
     _xI[VEL] = _target._xI[VEL] - _pursuer._xI[VEL];
     _anglesWrtInertial = initAngles();
-    _IB = Quaternion::dcmFromEulerAngles32(_anglesWrtInertial);
-    _qIB = Quaternion::quaternionFromEulerAngles321(_anglesWrtInertial);
-    _qBI = Quaternion::conjugate(_qIB);
+    _IB = GU::Quaternion::dcmFromEulerAngles32(_anglesWrtInertial);
+    _qIB = GU::Quaternion::quaternionFromEulerAngles321(_anglesWrtInertial);
+    _qBI = GU::Quaternion::conjugate(_qIB);
     _waypoint = Waypoint(_xI,
                           {0,0,0});
     _dt = dt;
@@ -79,8 +81,8 @@ Guidance::Guidance(const vector<vector<double>>& xTi,
 vector<double> Guidance::initAngles() {
     vector<double> angles(3, 0.0);
     const auto& r = _xI[POS];
-    angles[Z] = atan2(r[Y], r[X]);
-    angles[Y] = atan2(r[Z], sqrt(r[X]*r[X] + r[Y]*r[Y]));
+    angles[GC::Z] = atan2(r[GC::Y], r[GC::X]);
+    angles[GC::Y] = atan2(r[GC::Z], sqrt(r[GC::X]*r[GC::X] + r[GC::Y]*r[GC::Y]));
     return angles;
 }
 
@@ -102,11 +104,11 @@ void Guidance::update(void)
     _w =   cross(_xI[POS], _xI[VEL])/r2;
     computeOmegaGhose(); //updates _wGhose
     updateAnglesWrtInertial();
-    _IB = Quaternion::dcmFromEulerAngles32(_anglesWrtInertial);
-    auto dq = Quaternion::computeDerivative(_qIB, _wGhose);
+    _IB = GU::Quaternion::dcmFromEulerAngles32(_anglesWrtInertial);
+    auto dq = GU::Quaternion::computeDerivative(_qIB, _wGhose);
     _qIB = _qIB + _dt * dq;
     _qIB = _qIB/norm(_qIB);
-    _qBI = Quaternion::conjugate(_qIB);
+    _qBI = GU::Quaternion::conjugate(_qIB);
 }
 
 /*
@@ -133,10 +135,10 @@ void Guidance::computeOmegaGhose(void)
     double vt = norm(xTi[VEL]);
     double vp = norm(xPi[VEL]);
     double rMag = norm(_xI[POS]);
-    double thetaT = anglesWrtLosT[Y], psiT = anglesWrtLosT[Z];
-    double thetaP = anglesWrtLosP[Y], psiP = anglesWrtLosP[Z];
-    _wGhose[Y] = (1/rMag) * (vp * sin(thetaP) - vt * sin(thetaT));
-    _wGhose[Z] = (1/rMag) * (vt * cos(thetaT) * sin(psiT) - vp * cos(thetaP) * sin(psiP));
+    double thetaT = anglesWrtLosT[GC::Y], psiT = anglesWrtLosT[GC::Z];
+    double thetaP = anglesWrtLosP[GC::Y], psiP = anglesWrtLosP[GC::Z];
+    _wGhose[GC::Y] = (1/rMag) * (vp * sin(thetaP) - vt * sin(thetaT));
+    _wGhose[GC::Z] = (1/rMag) * (vt * cos(thetaT) * sin(psiT) - vp * cos(thetaP) * sin(psiP));
 }
 
 /*
@@ -157,8 +159,8 @@ void Guidance::computeCurStates(vector<double>& aCmdInLos, //output
     vector<double> rtp = xTi[POS] - xPi[POS];
     vector<double> lambdaDot = computeLosRate(xTi, tAnglesWrtLos, xPi, pAnglesWrtLos);
 
-    anglesWrtInertialNew[Z] = atan2(rtp[Y], rtp[X]);
-    anglesWrtInertialNew[Y] = atan2(rtp[Z], sqrt(rtp[X]*rtp[X] + rtp[Y]*rtp[Y]));
+    anglesWrtInertialNew[GC::Z] = atan2(rtp[GC::Y], rtp[GC::X]);
+    anglesWrtInertialNew[GC::Y] = atan2(rtp[GC::Z], sqrt(rtp[GC::X]*rtp[GC::X] + rtp[GC::Y]*rtp[GC::Y]));
 
     aCmdInLos = computeAccelCmdInLos(
         anglesWrtInertialNew, xPi[VEL], lambdaDot);
@@ -169,7 +171,7 @@ Biased ProNav
 */
 void Guidance::computeAccelCmdInLos(const vector<vector<double>>& xTi) {
     auto xPi = _pursuer._xI;
-    vector<double> vPinL =  Quaternion::rotateVectorByQuaternion(_qIB, xPi[VEL]);
+    vector<double> vPinL =  GU::Quaternion::rotateVectorByQuaternion(_qIB, xPi[VEL]);
     vector<double> aCmdInLos =  cross(_wGhose, vPinL);
     vector<double> r1 = (_xI[POS])/norm(_xI[POS]);
     vector<double> atPerp =  cross(r1, (xTi)[ACCEL]);
@@ -183,7 +185,7 @@ standard ProNav
 void Guidance::computeAccelCmdInLos(void) 
 {
     auto xPi = _pursuer._xI;
-    vector<double> vPinL =  Quaternion::rotateVectorByQuaternion(_qIB, xPi[VEL]);
+    vector<double> vPinL =  GU::Quaternion::rotateVectorByQuaternion(_qIB, xPi[VEL]);
     vector<double> aCmdInLos =  _Nprime*cross(_wGhose, vPinL);
     _aCmdInLos= clipVec(aCmdInLos, _accelMin, _accelMax);
 }
@@ -194,7 +196,7 @@ of making methods, classes compatible with Ardupilot
 vector<double> Guidance::computeAccelCmdInLosTmp(const vector<vector<double>>& xPi) 
 {
     
-    vector<double> vPinL =  Quaternion::rotateVectorByQuaternion(_qIB, xPi[VEL]);
+    vector<double> vPinL =  GU::Quaternion::rotateVectorByQuaternion(_qIB, xPi[VEL]);
     vector<double> aCmdInLos =  _Nprime*cross(_wGhose, vPinL);
     return  clipVec(aCmdInLos, _accelMin, _accelMax);
 }
@@ -209,8 +211,8 @@ vector<double> Guidance::computeAccelCmdInLos(
     const vector<double>& vP,
     const vector<double>& losRate)
 {
-    vector<double> qIL = Quaternion::quaternionFromEulerAngles321(anglesWrtInertial);
-    vector<double> vPinL = Quaternion::rotateVectorByQuaternion(qIL, vP);
+    vector<double> qIL = GU::Quaternion::quaternionFromEulerAngles321(anglesWrtInertial);
+    vector<double> vPinL = GU::Quaternion::rotateVectorByQuaternion(qIL, vP);
     vector<double>  aCmdInLos = cross(losRate, vPinL);
     return _Nprime * aCmdInLos;
 }
@@ -242,8 +244,8 @@ void Guidance::storeStatesInEnglishUnitsArdupilot(void)
 void Guidance::updateAnglesWrtInertial() 
 {
     const auto& r = _xI[POS];
-    _anglesWrtInertial[Z] = atan2(r[Y], r[X]);
-    _anglesWrtInertial[Y] = atan2(r[Z], sqrt(r[X]*r[X] + r[Y]*r[Y]));
+    _anglesWrtInertial[GC::Z] = atan2(r[GC::Y], r[GC::X]);
+    _anglesWrtInertial[GC::Y] = atan2(r[GC::Z], sqrt(r[GC::X]*r[GC::X] + r[GC::Y]*r[GC::Y]));
 }
 
 void Guidance::computeWaypoint(void )
@@ -320,9 +322,9 @@ void Guidance::computeWaypoint(void )
     }//end for loop
 
     // Rotate LOS acceleration into inertial frame
-    vector<double> qIB = Quaternion::quaternionFromEulerAngles321(losAnglesWrtInertial);
-    vector<double> qBI = Quaternion::conjugate(qIB);
-    vector<double> aCmdInI = Quaternion::rotateVectorByQuaternion(qBI, aCmdInLos);
+    vector<double> qIB = GU::Quaternion::quaternionFromEulerAngles321(losAnglesWrtInertial);
+    vector<double> qBI = GU::Quaternion::conjugate(qIB);
+    vector<double> aCmdInI = GU::Quaternion::rotateVectorByQuaternion(qBI, aCmdInLos);
 
     // Append acceleration to pursuer state
     xPi.push_back(aCmdInI); // Now xPi = [r, v, a]
@@ -459,10 +461,10 @@ vector<double> Guidance::computeOmegaGhose(const vector<vector<double>>& xTi,
     double vt = norm(xTi[VEL]);
     double vp = norm(xPi[VEL]);
     double rMag = norm(_xI[POS]);
-    double thetaT = anglesWrtLosT[Y], psiT = anglesWrtLosT[Z];
-    double thetaP = anglesWrtLosP[Y], psiP = anglesWrtLosP[Z];
-    angleRates[Y] = (1/rMag) * (vp * sin(thetaP) - vt * sin(thetaT));
-    angleRates[Z] = (1/rMag) * (vt * cos(thetaT) * sin(psiT) - vp * cos(thetaP) * sin(psiP));
+    double thetaT = anglesWrtLosT[GC::Y], psiT = anglesWrtLosT[GC::Z];
+    double thetaP = anglesWrtLosP[GC::Y], psiP = anglesWrtLosP[GC::Z];
+    angleRates[GC::Y] = (1/rMag) * (vp * sin(thetaP) - vt * sin(thetaT));
+    angleRates[GC::Z] = (1/rMag) * (vt * cos(thetaT) * sin(psiT) - vp * cos(thetaP) * sin(psiP));
     return angleRates;
 }
 
@@ -477,11 +479,11 @@ void Guidance::update(const vector<vector<double>>& xTi,
     _w =   cross(_xI[POS], _xI[VEL])/r2;
     _wGhose = computeOmegaGhose(xTi, tAnglesWrtLos, xPi, pAnglesWrtLos);
     updateAnglesWrtInertial();
-    _IB = Quaternion::dcmFromEulerAngles32(_anglesWrtInertial);
-    auto dq = Quaternion::computeDerivative(_qIB, _wGhose);
+    _IB = GU::Quaternion::dcmFromEulerAngles32(_anglesWrtInertial);
+    auto dq = GU::Quaternion::computeDerivative(_qIB, _wGhose);
     _qIB = _qIB + _dt * dq;
     _qIB = _qIB/norm(_qIB);
-    _qBI = Quaternion::conjugate(_qIB);
+    _qBI = GU::Quaternion::conjugate(_qIB);
     
 }
 
@@ -498,8 +500,8 @@ void Guidance::computeCurStates(
     vector<double> rtp = xTi[POS] - xPi[POS];
     vector<double> lambdaDot = computeLosRate(xTi, tAnglesWrtLos, xPi, pAnglesWrtLos);
 
-    anglesWrtInertialNew[Z] = atan2(rtp[Y], rtp[X]);
-    anglesWrtInertialNew[Y] = atan2(rtp[Z], sqrt(rtp[X]*rtp[X] + rtp[Y]*rtp[Y]));
+    anglesWrtInertialNew[GC::Z] = atan2(rtp[GC::Y], rtp[GC::X]);
+    anglesWrtInertialNew[GC::Y] = atan2(rtp[GC::Z], sqrt(rtp[GC::X]*rtp[GC::X] + rtp[GC::Y]*rtp[GC::Y]));
 
     aCmdInLos = computeAccelCmdInLos(
         anglesWrtInertialNew, 
@@ -538,9 +540,9 @@ vector<double> Guidance::computeLosRate(
     double thetaT = tAnglesWrtLos[1], psiT = tAnglesWrtLos[2];
     double thetaP = pAnglesWrtLos[1], psiP = pAnglesWrtLos[2];
 
-    angleRates[X] = 0.0;
-    angleRates[Y] = (1/r) * (vp * sin(thetaP) - vt * sin(thetaT));
-    angleRates[Z] = (1/r) * (vt * cos(thetaT) * sin(psiT) - vp * cos(thetaP) * sin(psiP));
+    angleRates[GC::X] = 0.0;
+    angleRates[GC::Y] = (1/r) * (vp * sin(thetaP) - vt * sin(thetaT));
+    angleRates[GC::Z] = (1/r) * (vt * cos(thetaT) * sin(psiT) - vp * cos(thetaP) * sin(psiP));
 
     return angleRates;
 }
@@ -549,10 +551,10 @@ vector<double> Guidance::computeAccelCmdInBody(const vector<vector<double>>& xPi
                                                 const vector<double>& anglesPandLos) {
     vector<double> aCmdInB(3, 0.0);
     double Vm = norm(xPi[VEL]);
-    double theta = anglesPandLos[Y];
-    double psi = anglesPandLos[Z];
-    aCmdInB[Y] = _Nprime * Vm * (-_wGhose[Y]*sin(theta)*sin(psi) + _wGhose[Z]*cos(theta));
-    aCmdInB[Z] = _Nprime * Vm * (-_wGhose[Y]*cos(psi));
+    double theta = anglesPandLos[GC::Y];
+    double psi = anglesPandLos[GC::Z];
+    aCmdInB[GC::Y] = _Nprime * Vm * (-_wGhose[GC::Y]*sin(theta)*sin(psi) + _wGhose[GC::Z]*cos(theta));
+    aCmdInB[GC::Z] = _Nprime * Vm * (-_wGhose[GC::Y]*cos(psi));
     return clipVec(aCmdInB, _accelMin, _accelMax);
 }
 
@@ -619,9 +621,9 @@ void Guidance::computeWaypoint(
     }//end for loop
 
     // Rotate LOS acceleration into inertial frame
-    vector<double> qIB = Quaternion::quaternionFromEulerAngles321(losAnglesWrtInertial);
-    vector<double> qBI = Quaternion::conjugate(qIB);
-    vector<double> aCmdInI = Quaternion::rotateVectorByQuaternion(qBI, aCmdInLos);
+    vector<double> qIB = GU::Quaternion::quaternionFromEulerAngles321(losAnglesWrtInertial);
+    vector<double> qBI = GU::Quaternion::conjugate(qIB);
+    vector<double> aCmdInI = GU::Quaternion::rotateVectorByQuaternion(qBI, aCmdInLos);
 
     // Append acceleration to pursuer state
     xPi.push_back(aCmdInI); // Now xPi = [r, v, a]
