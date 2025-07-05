@@ -12,10 +12,10 @@ Frame::Frame(const vector<vector<double>>& x0,
 {
     _dt = 0;
     _name = name;
-    _anglesWrtInertial = anglesWrtInertial * DEG2RAD;
+    _anglesWrtInertial = anglesWrtInertial * GC::DEG2RAD;
     _IB =GU::Quaternion::dcmFromEulerAngles321(_anglesWrtInertial);
-    vector<double> rInI = x0[POS] * FT2M;
-    vector<double> vInB = x0[VEL] * FT2M;
+    vector<double> rInI = x0[GC::POS] * GC::FT2M;
+    vector<double> vInB = x0[GC::VEL] * GC::FT2M;
     
     _qIB =GU::Quaternion::quaternionFromEulerAngles321(_anglesWrtInertial);
     _qBI =GU::Quaternion::conjugate(_qIB);
@@ -25,10 +25,10 @@ Frame::Frame(const vector<vector<double>>& x0,
 }
 
 void Frame::updateStates(const vector<double>& accelInBody) {
-    _xB[ACCEL] = accelInBody;
-    _xB[VEL] = accelInBody * _dt;
-    vector<double> xI0VRot =GU::Quaternion::rotateVectorByQuaternion(_qIB, _xI0[VEL]);
-    _xB[POS] = _xB[POS] + xI0VRot * _dt + accelInBody * (0.5f * _dt * _dt);
+    _xB[GC::ACCEL] = accelInBody;
+    _xB[GC::VEL] = accelInBody * _dt;
+    vector<double> xI0VRot =GU::Quaternion::rotateVectorByQuaternion(_qIB, _xI0[GC::VEL]);
+    _xB[GC::POS] = _xB[GC::POS] + xI0VRot * _dt + accelInBody * (0.5f * _dt * _dt);
 }
 
 
@@ -36,7 +36,7 @@ void Frame::storeStatesInEnglishUnits(const vector<double>& r,
                                       const vector<double>& v,
                                       const vector<double>& a,
                                       const string& frame) {
-    vector<vector<double>> states = { r * M2FT, v * M2FT, a * M2FT };
+    vector<vector<double>> states = { r * GC::M2FT, v * GC::M2FT, a * GC::M2FT };
     if (frame == "I") _stateHistInI.push_back(states);
     else if (frame == "B") _stateHistInB.push_back(states);
 }
@@ -44,13 +44,13 @@ void Frame::storeStatesInEnglishUnits(const vector<double>& r,
 const vector<double>& Frame::getAnglesWrtInertial() const { return _anglesWrtInertial; }
 
 vector<vector<double>> Frame::getInertialStates() const {
-    vector<double> aInI =GU::Quaternion::rotateVectorByQuaternion(_qBI, _xB[ACCEL]);
-    return { _xI[POS], _xI[VEL], aInI };
+    vector<double> aInI =GU::Quaternion::rotateVectorByQuaternion(_qBI, _xB[GC::ACCEL]);
+    return { _xI[GC::POS], _xI[GC::VEL], aInI };
 }
 
 vector<vector<double>> Frame::getBodyStates() const {
-    vector<double> rB = _xB[POS] + _xB[VEL] * _dt;
-    return { rB, _xB[VEL], _xB[ACCEL] };
+    vector<double> rB = _xB[GC::POS] + _xB[GC::VEL] * _dt;
+    return { rB, _xB[GC::VEL], _xB[GC::ACCEL] };
 }
 
 // json Frame::parseConfig(const string& cfgFile) {
@@ -67,37 +67,37 @@ vector<vector<double>> Frame::getBodyStates() const {
 vector<vector<double>> Frame::getStates() const { return _xI; }
 
 void Frame::printAngles() const {
-    std::cout << "\u03A8: " << RAD2DEG * _anglesWrtInertial[GC::Z] << " deg\n";
-    std::cout << "\u03B8: " << RAD2DEG * _anglesWrtInertial[GC::Y] << " deg\n";
-    std::cout << "\u03D5: " << RAD2DEG * _anglesWrtInertial[GC::X] << " deg\n\n";
+    std::cout << "\u03A8: " << GC::RAD2DEG * _anglesWrtInertial[GC::Z] << " deg\n";
+    std::cout << "\u03B8: " << GC::RAD2DEG * _anglesWrtInertial[GC::Y] << " deg\n";
+    std::cout << "\u03D5: " << GC::RAD2DEG * _anglesWrtInertial[GC::X] << " deg\n\n";
 }
 
 void Frame::printStates() const {
     std::cout << "---------" << (_name.empty() ? "vehicleObj" : _name) << "---------\n";
 
     const auto& statesI = getInertialStates();
-    const auto& r = statesI[POS];
-    // const auto& v = statesI[VEL];
-    // const auto& a = statesI[ACCEL];
+    const auto& r = statesI[GC::POS];
+    // const auto& v = statesI[GC::VEL];
+    // const auto& a = statesI[GC::ACCEL];
 
     const auto& statesB = getBodyStates();
-    const auto& rB = statesB[POS];
-    const auto& vB = statesB[VEL];
-    const auto& aB = statesB[ACCEL];
+    const auto& rB = statesB[GC::POS];
+    const auto& vB = statesB[GC::VEL];
+    const auto& aB = statesB[GC::ACCEL];
 
     std::cout << "\nrInI:\t";
-    for (double val : r * M2FT) std::cout << val << "\t";
+    for (double val : r * GC::M2FT) std::cout << val << "\t";
 
     std::cout << "\nvInB:\t";
-    for (double val : vB * M2FT) std::cout << val << "\t";
+    for (double val : vB * GC::M2FT) std::cout << val << "\t";
 
     std::cout << "\naInB:\t";
-    for (double val : aB * M2FT) std::cout << val << "\t";
+    for (double val : aB * GC::M2FT) std::cout << val << "\t";
 
     std::cout << "\n";
     const char* names[3] = {"\u03D5", "\u03B8", "\u03A8"};
     for (int i = 1; i < 3; ++i)
-        std::cout << names[i] << " (deg): " << RAD2DEG * _anglesWrtInertial[i] << "\n";
+        std::cout << names[i] << " (deg): " << GC::RAD2DEG * _anglesWrtInertial[i] << "\n";
 }
 
 
@@ -126,9 +126,9 @@ void Frame::writeStateHistoryDictCsv(void) const
 
     size_t n = _stateHistInI.size();
     for (size_t i = 0; i < n; ++i) {
-        const auto& r = _stateHistInI[i][POS];
-        const auto& v = _stateHistInI[i][VEL];
-        const auto& a = _stateHistInI[i][ACCEL];
+        const auto& r = _stateHistInI[i][GC::POS];
+        const auto& v = _stateHistInI[i][GC::VEL];
+        const auto& a = _stateHistInI[i][GC::ACCEL];
         const auto& angles = _anglesWrtInertialHist[i];   // [yaw, pitch, roll] in deg
         const auto& q = _qIBhist[i];                      // quaternion [w, x, y, z]
 

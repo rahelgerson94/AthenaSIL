@@ -20,7 +20,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Header includes
 ////////////////////////////////////////////////////////////////////////////////
-#include <AC_Guidance/Vehicle.h>
+#include <AC_Guidance/Guidance.h>
 
 #include <cmath>
 #include <stdio.h>
@@ -235,7 +235,7 @@ public:
     Copter(void);
 
 private:
-    Guidance guide;
+    //Guidance guide;
     // key aircraft parameters passed to multiple libraries
     AP_MultiCopter aparm;
 

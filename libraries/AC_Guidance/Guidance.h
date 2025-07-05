@@ -7,6 +7,7 @@
 #include "VectorMath.h"
 #include "Frame.h"
 #include "Vehicle.h"
+namespace GC = GuidanceConstants;
 
 class Waypoint
 {
@@ -25,12 +26,12 @@ class Waypoint
     {
         vector<std::vector<double>> xI 
         = {
-        _xI[POS] * M2FT,
-        _xI[VEL] * M2FT,
-        _xI[ACCEL] * M2FT
+        _xI[GC::POS] * GC::M2FT,
+        _xI[GC::VEL] * GC::M2FT,
+        _xI[GC::ACCEL] * GC::M2FT
         };
 
-        vector<double> angles = _anglesWrtInertial * RAD2DEG;
+        vector<double> angles = _anglesWrtInertial * GC::RAD2DEG;
         return Waypoint(xI, angles);
     }
 };

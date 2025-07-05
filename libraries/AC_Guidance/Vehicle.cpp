@@ -8,11 +8,11 @@ Vehicle::Vehicle(const vector<vector<double>>& x0, //{rInI, vInB}
                  const std::string& name)
     : Frame(x0, anglesWrtInertial, dt, name)
 {
-    _xI = initInertialStates(x0[POS]* FT2M, 
-                            x0[VEL]* FT2M);
+    _xI = initInertialStates(x0[GC::POS]* GC::FT2M, 
+                            x0[GC::VEL]* GC::FT2M);
     _qLB = {0,0,0,0};
     _anglesWrtLos= {0,0,0};  
-    _vB = x0[VEL][GC::X]* FT2M;
+    _vB = x0[GC::VEL][GC::X]* GC::FT2M;
     _dt = dt;
     
 }
@@ -40,17 +40,17 @@ void Vehicle::update(const vector<double>& accelInFrame,
 
     double gamma = _anglesWrtInertial[GC::Y];
     double phi = _anglesWrtInertial[GC::Z];
-    vector<double> vInIprev = _xI[VEL];
-    double vB = _xB[VEL][GC::X];
-    _xI[VEL] = 
+    vector<double> vInIprev = _xI[GC::VEL];
+    double vB = _xB[GC::VEL][GC::X];
+    _xI[GC::VEL] = 
     {
         vB * cos(phi) * cos(gamma),
         vB * sin(phi) * cos(gamma),
         vB * sin(gamma)
     };
 
-    _xI[POS] = _xI[POS] + _xI[VEL] * _dt;
-    _xI[ACCEL] = (_xI[VEL] - vInIprev)/_dt;
+    _xI[GC::POS] = _xI[GC::POS] + _xI[GC::VEL] * _dt;
+    _xI[GC::ACCEL] = (_xI[GC::VEL] - vInIprev)/_dt;
     _anglesWrtLos = computeAnglesWrtLos(anglesLosInertial);
     _qLB = GU::Quaternion::quaternionFromEulerAngles321(_anglesWrtLos);
     if (accelFrame ==  "l" || accelFrame == "L")
@@ -63,14 +63,14 @@ void Vehicle::update(const vector<double>& accelInFrame,
     _qIB =GU::Quaternion::quaternionFromEulerAngles321(_anglesWrtInertial);
 
     _qBI =GU::Quaternion::conjugate(_qIB);
-    _xB[ACCEL] = accelInBody;
-    _xB[VEL] = _xB[VEL] + _xB[ACCEL] * _dt;
-    _xB[POS] = vector<double>(3,0);
+    _xB[GC::ACCEL] = accelInBody;
+    _xB[GC::VEL] = _xB[GC::VEL] + _xB[GC::ACCEL] * _dt;
+    _xB[GC::POS] = vector<double>(3,0);
 }
 
 vector<double> Vehicle::computeAngleRatesWrtInertial(const vector<double>& a)
 {
-    double vx = _xB[VEL][GC::X];
+    double vx = _xB[GC::VEL][GC::X];
     double theta = _anglesWrtInertial[GC::Y];
     double thetaDot = (a[GC::Z] == 0 && vx == 0) ? 0 : a[GC::Z] / vx;
     double psiDot = (a[GC::Y] == 0 && vx == 0) ? 0 : a[GC::Y] / (vx * cos(theta));
@@ -80,7 +80,7 @@ vector<double> Vehicle::computeAngleRatesWrtInertial(const vector<double>& a)
 vector<double> Vehicle::computeAnglesWrtLos(const vector<double>& anglesLosInertial)
 {
     vector<double> qIL = GU::Quaternion::quaternionFromEulerAngles321(anglesLosInertial);
-    auto vLos = GU::Quaternion::rotateVectorByQuaternion(qIL, _xI[VEL]);
+    auto vLos = GU::Quaternion::rotateVectorByQuaternion(qIL, _xI[GC::VEL]);
     vector<double> angles = {0.0, 0.0, 0.0};
     angles[GC::Y] = atan2(vLos[GC::Z], std::sqrt(vLos[GC::Y]*vLos[GC::Y] + vLos[GC::X]*vLos[GC::X]));
     angles[GC::Z] = atan2(vLos[GC::Y], vLos[GC::X]);
@@ -94,27 +94,27 @@ const vector<double>& Vehicle::getAnglesWrtLos()
 
 void Vehicle::storeStatesInEnglishUnits() {
     auto statesI = Frame::getInertialStates();
-    Frame::storeStatesInEnglishUnits(statesI[POS], statesI[VEL], statesI[ACCEL], "I");
+    Frame::storeStatesInEnglishUnits(statesI[GC::POS], statesI[GC::VEL], statesI[GC::ACCEL], "I");
     auto statesB = Frame::getBodyStates();
-    Frame::storeStatesInEnglishUnits(statesB[POS], statesB[VEL], statesB[ACCEL], "B");
-    _anglesWrtInertialHist.push_back(_anglesWrtInertial * RAD2DEG);
-    _anglesWrtLosHist.push_back(_anglesWrtLos * RAD2DEG);
+    Frame::storeStatesInEnglishUnits(statesB[GC::POS], statesB[GC::VEL], statesB[GC::ACCEL], "B");
+    _anglesWrtInertialHist.push_back(_anglesWrtInertial * GC::RAD2DEG);
+    _anglesWrtLosHist.push_back(_anglesWrtLos * GC::RAD2DEG);
     _qIBhist.push_back(_qIB);
 }
 
 void Vehicle::setPos(const vector<double>& r, const std::string& frame) {
-    if (frame == "b") _xB[POS] = r;
-    else _xI[POS] = r;
+    if (frame == "b") _xB[GC::POS] = r;
+    else _xI[GC::POS] = r;
 }
 
 void Vehicle::setVel(const vector<double>& v, const std::string& frame) {
-    if (frame == "b") _xB[VEL] = v;
-    else _xI[VEL] = v;
+    if (frame == "b") _xB[GC::VEL] = v;
+    else _xI[GC::VEL] = v;
 }
 
 void Vehicle::setAccel(const vector<double>& a, const std::string& frame) {
-    if (frame == "b") _xB[ACCEL] = a;
-    else _xI[ACCEL] = a;
+    if (frame == "b") _xB[GC::ACCEL] = a;
+    else _xI[GC::ACCEL] = a;
 }
 
 void Vehicle::setAnglesWrtInertial(const vector<double>& ea) {
@@ -145,9 +145,9 @@ void Vehicle::writeStateHistoryDictCsv( ) const
 
     size_t n = _stateHistInI.size();
     for (size_t i = 0; i < n; ++i) {
-        const auto& r = _stateHistInI[i][POS];
-        const auto& v = _stateHistInI[i][VEL];
-        const auto& a = _stateHistInI[i][ACCEL];
+        const auto& r = _stateHistInI[i][GC::POS];
+        const auto& v = _stateHistInI[i][GC::VEL];
+        const auto& a = _stateHistInI[i][GC::ACCEL];
         const auto& angles = _anglesWrtInertialHist[i];   // [yaw, pitch, roll] in deg
         const auto& losAngles = _anglesWrtLosHist[i];     // [yaw, pitch, roll] in deg
         const auto& q = _qIBhist[i];                      // quaternion [w, x, y, z]
@@ -183,12 +183,12 @@ void Vehicle::computeCurStates(
     double gamma = anglesWrtInertialPrev[GC::Y];
     double phi = anglesWrtInertialPrev[GC::Z];
 
-    xI[VEL][GC::X] = vB * std::cos(phi) * std::cos(gamma);
-    xI[VEL][GC::Y] = vB * std::sin(phi) * std::cos(gamma);
-    xI[VEL][GC::Z] = vB * std::sin(gamma);
+    xI[GC::VEL][GC::X] = vB * std::cos(phi) * std::cos(gamma);
+    xI[GC::VEL][GC::Y] = vB * std::sin(phi) * std::cos(gamma);
+    xI[GC::VEL][GC::Z] = vB * std::sin(gamma);
 
     
-    xI[POS] = xIprev[POS]+ xI[VEL] * _dt;
+    xI[GC::POS] = xIprev[GC::POS]+ xI[GC::VEL] * _dt;
 
     anglesWrtLos = computeAnglesWrtLos(xI, anglesLosInertial);
     vector<double> qLB = GU::Quaternion::quaternionFromEulerAngles321(anglesWrtLos);
@@ -227,7 +227,7 @@ vector<double> Vehicle::computeAnglesWrtLos(
     const vector<double>& anglesLosInertial)
 {
     vector<double> qIL = GU::Quaternion::quaternionFromEulerAngles321(anglesLosInertial);
-    vector<double> vLos = GU::Quaternion::rotateVectorByQuaternion(qIL, xIcur[VEL]);
+    vector<double> vLos = GU::Quaternion::rotateVectorByQuaternion(qIL, xIcur[GC::VEL]);
 
     vector<double> angles(3, 0.0);
     angles[GC::Y] = std::atan2(vLos[GC::Z], std::sqrt(vLos[GC::X]*vLos[GC::X] + vLos[GC::Y]*vLos[GC::Y]));
